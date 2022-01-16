@@ -28,13 +28,37 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
 
   /**************************************************************************** */
+  app.get( "/filteredimage/", async ( req, res ) => {
+    const image_url = req.query.image_url;
+    try {
+        if (image_url === null) {
+            return res.status(500).send({ message: 'image url not found' });
+        } 
+        else {
+           const filePath = await filterImageFromURL(image_url);
+          
+          await res.status(201).sendFile(filePath, {}, (error) => {
+            if(error) { return res.status(422).send({message :`Unable to process the image`}); }
+            deleteLocalFiles([filePath]);
+          });
+        }
+    }
+    catch(err) {
+      res.status(500).send('Error Occurred in Image Filtering Service. Try with another image URL');
+    }
+   
+  } );
+
+  
+
+  
 
   //! END @TODO1
   
   // Root Endpoint
   // Displays a simple message to the user
-  app.get( "/", async ( req, res ) => {
-    res.send("try GET /filteredimage?image_url={{}}")
+  app.get( "/", async ( req, res ) => {   
+    res.send("try GET /filteredimage?image_url={{}}")   
   } );
   
 
