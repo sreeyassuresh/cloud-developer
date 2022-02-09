@@ -11,29 +11,54 @@ const cloudwatch = new AWS.CloudWatch();
 
 exports.handler = async (event) => {
   // TODO: Use these variables to record metric values
-  let endTime
-  let requestWasSuccessful
+  let endTime = 0;
+  let requestWasSuccessful = true;
 
   const startTime = timeInMs()
+  try {
   await axios.get(url)
+  }
+  catch(ex) {
+    requestWasSuccessful = false;
+  }
+  finally {
+    endTime =  timeInMs();
+  }
 
   // Example of how to write a single data point
-  // await cloudwatch.putMetricData({
-  //   MetricData: [
-  //     {
-  //       MetricName: 'MetricName', // Use different metric names for different values, e.g. 'Latency' and 'Successful'
-  //       Dimensions: [
-  //         {
-  //           Name: 'ServiceName',
-  //           Value: serviceName
-  //         }
-  //       ],
-  //       Unit: '', // 'Count' or 'Milliseconds'
-  //       Value: 0 // Total value
-  //     }
-  //   ],
-  //   Namespace: 'Udacity/Serveless'
-  // }).promise()
+  await cloudwatch.putMetricData({
+    MetricData: [
+      {
+        MetricName: 'Success', // Use different metric names for different values, e.g. 'Latency' and 'Successful'
+        Dimensions: [
+          {
+            Name: serviceName,
+            Value: serviceName
+          }
+        ],
+        Unit: 'Count', // 'Count' or 'Milliseconds'
+        Value: requestWasSuccessful ? 1 : 0// Total value
+      }
+    ],
+    Namespace: 'Udacity/Serveless'
+  }).promise()
+
+  await cloudwatch.putMetricData({
+    MetricData: [
+      {
+        MetricName: 'MetricName', // Use different metric names for different values, e.g. 'Latency' and 'Successful'
+        Dimensions: [
+          {
+            Name: serviceName,
+            Value: serviceName
+          }
+        ],
+        Unit: 'Milliseconds', // 'Count' or 'Milliseconds'
+        Value: endTime // Total value
+      }
+    ],
+    Namespace: 'Udacity/Serveless'
+  }).promise()
 
   // TODO: Record time it took to get a response
   // TODO: Record if a response was successful or not

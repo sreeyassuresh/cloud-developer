@@ -254,7 +254,6 @@ resources:
                 - DELETE
                 - HEAD
               MaxAge: 3000
-
     BucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:
